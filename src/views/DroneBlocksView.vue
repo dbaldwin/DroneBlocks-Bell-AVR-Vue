@@ -13,10 +13,17 @@ const code = ref();
 const options = {
   media: "media/",
   grid: {
-    spacing: 25,
-    length: 3,
-    colour: "#ccc",
-    snap: true,
+    spacing: 20,
+    length: 1,
+    colour: '#888',
+    snap: false
+  },
+  zoom: {
+    controls: true,
+    startScale: 1,
+    maxScale: 3,
+    minScale: 0.3,
+    scaleSpeed: 1.2
   },
   toolbox: `<xml>
           <category name="Navigation" colour="#FF0000">
@@ -100,21 +107,21 @@ const options = {
             <block type="text_print"></block>
           </category>
           <category name="Variables" custom="VARIABLE" colour="%{BKY_VARIABLES_HUE}">
-            </category>
-          <category name="Stocks" colour="%{BKY_LOOPS_HUE}">
-            <block type="stock_buy_simple"></block>
-            <block type="stock_buy_prog"></block>
-            <block type="stock_fetch_price"></block>
           </category>
         </xml>`,
 };
 const showCode = () => {
   (code.value = javascriptGenerator.workspaceToCode(foo.value.workspace));
 }
+
+const launchMission = () => {
+  console.log('launching mission')
+}
 </script>
 
 <template>
   <div>
+    <button class="button is-primary" id="launchButton" @click="launchMission">Launch</button>
     <BlocklyComponent id="blocklyComponent" :options="options" ref="foo"></BlocklyComponent>
     <p id="code">
       <button @click="showCode()">Show JavaScript</button>
@@ -127,7 +134,7 @@ const showCode = () => {
 #code {
   position: absolute;
   right: 0;
-  top: 100;
+  top: 60px;
   width: 50%;
   height: 90%;
   margin: 0;
@@ -137,8 +144,15 @@ const showCode = () => {
 #blocklyComponent {
   position: absolute;
   left: 0;
-  top: 100;
+  top: 60px;
   width: 50%;
   height: 90%;
+}
+
+#launchButton {
+  position: absolute;
+  top: 150px;
+  left: 50%;
+  z-index: 100;
 }
 </style>
