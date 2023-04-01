@@ -1,7 +1,7 @@
 <template>
   <nav class="navbar" role="navigation" aria-label="main navigation">
     <div class="navbar-brand">
-      <a class="navbar-item" href="https://bulma.io">
+      <a class="navbar-item">
         <img src="../assets/images/logo.png">
       </a>
 
@@ -25,9 +25,6 @@
       <div class="navbar-end">
         <div class="navbar-item">
           <div class="buttons">
-            <a class="button is-primary">
-              <strong>Launch</strong>
-            </a>
             <a class="button is-light">
               Log in
             </a>

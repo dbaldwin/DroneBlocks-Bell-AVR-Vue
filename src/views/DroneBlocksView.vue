@@ -115,7 +115,7 @@ const showCode = () => {
 }
 
 const launchMission = () => {
-  console.log('launching mission')
+  console.log(javascriptGenerator.workspaceToCode(foo.value.workspace))
 }
 </script>
 
