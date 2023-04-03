@@ -141,6 +141,11 @@ const launchMission = () => {
 
 }
 
+// Method for external application to send next command
+window.processNextCommand = function() {
+  console.log(javascriptGenerator.workspaceToCode(blocklyRef.value.workspace));
+}
+
 const setupInterpreter = () => {
   const code = javascriptGenerator.workspaceToCode(blocklyRef.value.workspace);
 
