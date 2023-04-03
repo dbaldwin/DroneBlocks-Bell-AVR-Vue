@@ -6,12 +6,13 @@ import { javascriptGenerator } from "blockly/javascript";
 import { NavigationBlocks } from "@/blocks/navigation"
 import { TakeoffBlocks } from "@/blocks/takeoff";
 import Interpreter from "js-interpreter"
-import Blockly from "blockly";
+import { CommandProcessor } from '@/command-processor';
 
 // onMounted(() => {
 //   console.log("mounted!");
 //   new Interpreter();
 // });
+let commandProcessor: CommandProcessor;
 
 new NavigationBlocks();
 new TakeoffBlocks();
@@ -143,15 +144,11 @@ const launchMission = () => {
 
 // Method for external application to send next command
 window.processNextCommand = function () {
-  console.log(javascriptGenerator.workspaceToCode(blocklyRef.value.workspace));
+  //console.log(javascriptGenerator.workspaceToCode(blocklyRef.value.workspace));
+  commandProcessor.step();
 }
 
 const setupInterpreter = () => {
-  const code = javascriptGenerator.workspaceToCode(blocklyRef.value.workspace);
-
-  console.log(code);
-
-  return;
 
   function interpreterAPI(interpreter: Interpreter, globalObject: object) {
 
@@ -166,16 +163,16 @@ const setupInterpreter = () => {
     interpreter.setProperty(globalObject, 'highlightBlock', interpreter.createNativeFunction(highlightBlockWrapper));
 
     // Send normal command - command processor
-    const sendCommandWrapper = function (...args) {
-      commandProcessor.sendCommand(...args);
+    const sendCommandWrapper = function (command: string) {
+      commandProcessor.sendCommand(command);
     }
     interpreter.setProperty(globalObject, 'sendCommand', interpreter.createNativeFunction(sendCommandWrapper));
 
-    // For the print block
-    const alertWrapper = function (message: string) {
-      return commandProcessor.log(message);
-    }
-    interpreter.setProperty(globalObject, 'alert', interpreter.createNativeFunction(alertWrapper));
+    // // For the print block
+    // const alertWrapper = function (message: string) {
+    //   return commandProcessor.log(message);
+    // }
+    // interpreter.setProperty(globalObject, 'alert', interpreter.createNativeFunction(alertWrapper));
 
     // Wait
     const waitWrapper = function async(timeInSeconds: number, callback: Function) {
@@ -188,21 +185,23 @@ const setupInterpreter = () => {
     }
     interpreter.setProperty(globalObject, 'waitForSeconds', interpreter.createAsyncFunction(waitWrapper));
 
-    // Handle variables in the workspace
-    const setGlobalVarWrapper = function (varName, varValue) {
-      commandProcessor.setGlobalVar(varName, varValue);
-    }
-    interpreter.setProperty(globalObject, 'setGlobalVar', interpreter.createNativeFunction(setGlobalVarWrapper))
+    // // Handle variables in the workspace
+    // const setGlobalVarWrapper = function (varName, varValue) {
+    //   commandProcessor.setGlobalVar(varName, varValue);
+    // }
+    // interpreter.setProperty(globalObject, 'setGlobalVar', interpreter.createNativeFunction(setGlobalVarWrapper))
 
-    const getGlobalVarWrapper = function (varName) {
-      return commandProcessor.getGlobalVar(varName);
-    }
-    interpreter.setProperty(globalObject, 'getGlobalVar', interpreter.createNativeFunction(getGlobalVarWrapper))
+    // const getGlobalVarWrapper = function (varName) {
+    //   return commandProcessor.getGlobalVar(varName);
+    // }
+    // interpreter.setProperty(globalObject, 'getGlobalVar', interpreter.createNativeFunction(getGlobalVarWrapper))
   }
 
   // Launch the mission
+  const code = javascriptGenerator.workspaceToCode(blocklyRef.value.workspace);
+  console.log(code);
   const interpreter = new Interpreter(code, interpreterAPI);
-  commandProcessor = new CommandProcessor(interpreter, Blockly.getMainWorkspace());
+  commandProcessor = new CommandProcessor(interpreter, blocklyRef.value.workspace);
   commandProcessor.step();
 }
 </script>
