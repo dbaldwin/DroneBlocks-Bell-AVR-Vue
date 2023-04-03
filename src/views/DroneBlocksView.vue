@@ -1,10 +1,16 @@
 <script setup lang="ts">
 
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import BlocklyComponent from "../components/BlocklyComponent.vue";
 import { javascriptGenerator } from "blockly/javascript";
 import { NavigationBlocks } from "@/blocks/navigation"
 import { TakeoffBlocks } from "@/blocks/takeoff";
+import Interpreter from "js-interpreter"
+
+// onMounted(() => {
+//   console.log("mounted!");
+//   new Interpreter();
+// });
 
 new NavigationBlocks();
 new TakeoffBlocks();
@@ -128,6 +134,16 @@ const showCode = () => {
 
 const launchMission = () => {
   console.log('launching mission')
+  const code = javascriptGenerator.workspaceToCode(foo.value.workspace);
+  console.log(code);
+
+  // const interpreter = new Interpreter(code, () => {
+  //   interpreter.setProperty()
+  // });
+}
+
+const setupInterpreter = () => {
+
 }
 </script>
 

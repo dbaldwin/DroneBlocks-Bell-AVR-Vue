@@ -27,8 +27,19 @@ export class TakeoffBlocks {
         nextStatement: null,
         style: 'takeoff_blocks',
     },
-
     ]);
+
+    // Generators
+    javascriptGenerator['takeoff'] = function (block: Blockly.Block) {
+      const code = `sendCommand("takeoff");`;
+      return code;
+    };
+
+    javascriptGenerator['takeoff_after'] = function (block: Blockly.Block) {
+        const delay = javascriptGenerator.valueToCode(block, 'delay', javascriptGenerator.ORDER_ATOMIC);
+        const code = `waitForSeconds(${delay});sendCommand("takeoff");`;
+        return code;
+  };
   }
 
 
