@@ -6,6 +6,7 @@ import { javascriptGenerator } from "blockly/javascript";
 import { NavigationBlocks } from "@/blocks/navigation"
 import { TakeoffBlocks } from "@/blocks/takeoff";
 import Interpreter from "js-interpreter"
+import Blockly from "blockly";
 
 // onMounted(() => {
 //   console.log("mounted!");
@@ -15,8 +16,8 @@ import Interpreter from "js-interpreter"
 new NavigationBlocks();
 new TakeoffBlocks();
 
-const foo = ref();
-const code = ref();
+const blocklyRef = ref();
+const codeRef = ref();
 
 const options = {
   media: "media/",
@@ -129,31 +130,85 @@ const options = {
   </xml>`,
 };
 const showCode = () => {
-  (code.value = javascriptGenerator.workspaceToCode(foo.value.workspace));
+  (codeRef.value = javascriptGenerator.workspaceToCode(blocklyRef.value.workspace));
 }
 
 const launchMission = () => {
-  console.log('launching mission')
-  const code = javascriptGenerator.workspaceToCode(foo.value.workspace);
-  console.log(code);
+  // console.log('launching mission')
+  // const code = javascriptGenerator.workspaceToCode(blocklyRef.value.workspace);
+  // console.log(code);
+  setupInterpreter();
 
-  // const interpreter = new Interpreter(code, () => {
-  //   interpreter.setProperty()
-  // });
 }
 
 const setupInterpreter = () => {
+  const code = javascriptGenerator.workspaceToCode(blocklyRef.value.workspace);
 
+  console.log(code);
+
+  return;
+
+  function interpreterAPI(interpreter: Interpreter, globalObject: object) {
+
+    // Ensure function name does not conflict with variable names.
+    javascriptGenerator.addReservedWords('highlightBlock');
+
+    // Highlight block
+    const highlightBlockWrapper = function (blockId: string) {
+      //Blockly.getMainWorkspace().highlightBlock(blockId)
+      blocklyRef.value.workspace.highlightBlock(blockId);
+    }
+    interpreter.setProperty(globalObject, 'highlightBlock', interpreter.createNativeFunction(highlightBlockWrapper));
+
+    // Send normal command - command processor
+    const sendCommandWrapper = function (...args) {
+      commandProcessor.sendCommand(...args);
+    }
+    interpreter.setProperty(globalObject, 'sendCommand', interpreter.createNativeFunction(sendCommandWrapper));
+
+    // For the print block
+    const alertWrapper = function (message: string) {
+      return commandProcessor.log(message);
+    }
+    interpreter.setProperty(globalObject, 'alert', interpreter.createNativeFunction(alertWrapper));
+
+    // Wait
+    const waitWrapper = function async(timeInSeconds: number, callback: Function) {
+      commandProcessor.pauseCode = true;
+      // Delay the call to the callback.
+      setTimeout(() => {
+        callback();
+        commandProcessor.step();
+      }, timeInSeconds * 1000);
+    }
+    interpreter.setProperty(globalObject, 'waitForSeconds', interpreter.createAsyncFunction(waitWrapper));
+
+    // Handle variables in the workspace
+    const setGlobalVarWrapper = function (varName, varValue) {
+      commandProcessor.setGlobalVar(varName, varValue);
+    }
+    interpreter.setProperty(globalObject, 'setGlobalVar', interpreter.createNativeFunction(setGlobalVarWrapper))
+
+    const getGlobalVarWrapper = function (varName) {
+      return commandProcessor.getGlobalVar(varName);
+    }
+    interpreter.setProperty(globalObject, 'getGlobalVar', interpreter.createNativeFunction(getGlobalVarWrapper))
+  }
+
+  // Launch the mission
+  const interpreter = new Interpreter(code, interpreterAPI);
+  commandProcessor = new CommandProcessor(interpreter, Blockly.getMainWorkspace());
+  commandProcessor.step();
 }
 </script>
 
 <template>
   <div>
     <button class="button is-primary" id="launchButton" @click="launchMission">Launch</button>
-    <BlocklyComponent id="blocklyComponent" :options="options" ref="foo"></BlocklyComponent>
+    <BlocklyComponent id="blocklyComponent" :options="options" ref="blocklyRef"></BlocklyComponent>
     <p id="code">
       <button @click="showCode()">Show JavaScript</button>
-    <pre v-html="code"></pre>
+    <pre v-html="codeRef"></pre>
     </p>
   </div>
 </template>

@@ -12,6 +12,7 @@
 
 import { onMounted, ref, shallowRef } from "vue";
 import Blockly from "blockly";
+import { javascriptGenerator } from "blockly/javascript";
 
 const props = defineProps(["options"]);
 const blocklyToolbox = ref();
@@ -23,7 +24,9 @@ defineExpose({ workspace });
 onMounted(() => {
     const options = props.options || {};
     workspace.value = Blockly.inject(blocklyDiv.value, options);
+    javascriptGenerator.STATEMENT_PREFIX = 'highlightBlock(%1);\n';
 });
+
 </script>
 
 <template>
