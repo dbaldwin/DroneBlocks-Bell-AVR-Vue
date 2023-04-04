@@ -1,20 +1,20 @@
 import * as Blockly from 'blockly'
 import { javascriptGenerator } from 'blockly/javascript'
 
-export class TakeoffBlocks {
+export class LandBlocks {
   constructor() {
     // Block definitions
     Blockly.defineBlocksWithJsonArray([
       {
-        type: 'takeoff',
-        message0: 'takeoff',
+        type: 'land',
+        message0: 'land',
         previousStatement: null,
         nextStatement: null,
-        style: 'takeoff_blocks'
+        style: 'land_blocks'
       },
       {
-        type: 'takeoff_after',
-        message0: 'takeoff after %1 seconds',
+        type: 'land_then_takeoff',
+        message0: 'land for %1 seconds then takeoff',
         args0: [
           {
             type: 'input_value',
@@ -24,17 +24,17 @@ export class TakeoffBlocks {
         inputsInline: true,
         previousStatement: null,
         nextStatement: null,
-        style: 'takeoff_blocks'
+        style: 'land_blocks'
       }
     ])
 
     // Generators
-    javascriptGenerator['takeoff'] = function (block: Blockly.Block) {
-      const command = `{"action": "takeoff", "payload": { "alt": 2.5 }}`
+    javascriptGenerator['land'] = function (block: Blockly.Block) {
+      const command = `{"action": "land", "payload": {}}`
       return `sendNavigationCommand(${JSON.stringify(command)});`
     }
 
-    javascriptGenerator['takeoff_after'] = function (block: Blockly.Block) {
+    javascriptGenerator['land_then_takeoff'] = function (block: Blockly.Block) {
       const delay = javascriptGenerator.valueToCode(
         block,
         'delay',

@@ -1,6 +1,7 @@
 import Interpreter from 'js-interpreter'
 import Blockly from 'blockly'
 import { toast } from 'bulma-toast'
+import * as mqtt from 'mqtt/dist/mqtt.min'
 
 export class CommandProcessor {
   interpreter: Interpreter
@@ -8,19 +9,19 @@ export class CommandProcessor {
   workspace: Blockly.Workspace
   isAbortingMission: Boolean
   globalVars: Object
+  mqttBroker: mqtt
 
-  constructor(interpreter: Interpreter, workspace: Blockly.Workspace) {
+  constructor(interpreter: Interpreter, workspace: Blockly.Workspace, mqttBroker: mqtt) {
     this.interpreter = interpreter
     this.pauseCode = false
     this.workspace = workspace
     this.isAbortingMission = false
     this.globalVars = {}
+    this.mqttBroker = mqttBroker
   }
 
   step() {
     this.pauseCode = false
-
-    console.log('cp.step')
 
     do {
       try {
@@ -45,10 +46,14 @@ export class CommandProcessor {
   }
 
   // Send command to main process
-  sendCommand(command: string) {
-    // window.ipcRenderer.send('send_command_to_tello', args)
-    console.log(`sendCommand: ${command}`)
+  sendNavigationCommand(json: string) {
+    console.log(json)
+    this.mqttBroker.publish('avr/fcm/actions', json)
     this.pauseCode = true
+
+    setTimeout(() => {
+      this.step()
+    }, 1000)
   }
 
   sendLEDCommand(command, values) {

@@ -5,20 +5,21 @@ import BlocklyComponent from "../components/BlocklyComponent.vue";
 import { javascriptGenerator } from "blockly/javascript";
 import { NavigationBlocks } from "@/blocks/navigation"
 import { TakeoffBlocks } from "@/blocks/takeoff";
+import { LandBlocks } from "@/blocks/land";
 import Interpreter from "js-interpreter"
 import { CommandProcessor } from '@/command-processor';
 import DroneBlocksTheme from '@/themes/droneblocks.js'
+import * as mqtt from 'mqtt/dist/mqtt.min'
 
-// onMounted(() => {
-//   console.log("mounted!");
-//   new Interpreter();
-// });
+let mqttBroker: mqtt
 let commandProcessor: CommandProcessor;
 
 new NavigationBlocks();
 new TakeoffBlocks();
+new LandBlocks();
 
 const blocklyRef = ref();
+const launchButonRef = ref();
 
 const options = {
   theme: DroneBlocksTheme,
@@ -97,11 +98,24 @@ const options = {
           </shadow>
         </value>
       </block>
+      <block type="go_home"></block>
     </category>
     <category name="Land" colour="#fb5607">
+      <block type="land"></block>
+      <block type="land_then_takeoff">
+        <value name="delay">
+          <shadow type="math_number">
+            <field name="NUM">5</field>
+          </shadow>
+        </value>
+      </block>
+    </category>
+    <sep></sep>
+    <category name="Control" colour="#ffc6ff">
     </category>
     <category name="LED" colour="#bdb2ff">
     </category>
+    <sep></sep>
     <category name="Logic" colour="#4ecdc4">
       <block type="controls_if"></block>
       <block type="logic_compare"></block>
@@ -131,10 +145,93 @@ const options = {
       <block type="text_length"></block>
       <block type="text_print"></block>
     </category>
+    <category name="Lists" colour="#9b5de5">
+      <block type="lists_create_with">
+        <mutation items="0"></mutation>
+      </block>
+      <block type="lists_create_with">
+        <mutation items="3"></mutation>
+      </block>
+      <block type="lists_repeat">
+        <value name="NUM">
+          <shadow type="math_number">
+            <field name="NUM">5</field>
+          </shadow>
+        </value>
+      </block>
+      <block type="lists_length"></block>
+      <block type="lists_isEmpty"></block>
+      <block type="lists_indexOf">
+        <field name="END">FIRST</field>
+        <value name="VALUE">
+          <block type="variables_get">
+            <field name="VAR" id="@=*efbqX#savK%0;4;fo">list</field>
+          </block>
+        </value>
+      </block>
+      <block type="lists_getIndex">
+        <mutation statement="false" at="true"></mutation>
+        <field name="MODE">GET</field>
+        <field name="WHERE">FROM_START</field>
+        <value name="VALUE">
+          <block type="variables_get">
+            <field name="VAR" id="@=*efbqX#savK%0;4;fo">list</field>
+          </block>
+        </value>
+      </block>
+      <block type="lists_setIndex">
+        <mutation at="true"></mutation>
+        <field name="MODE">SET</field>
+        <field name="WHERE">FROM_START</field>
+        <value name="LIST">
+          <block type="variables_get">
+            <field name="VAR" id="@=*efbqX#savK%0;4;fo">list</field>
+          </block>
+        </value>
+      </block>
+      <block type="lists_getSublist">
+        <mutation at1="true" at2="true"></mutation>
+        <field name="WHERE1">FROM_START</field>
+        <field name="WHERE2">FROM_START</field>
+        <value name="LIST">
+          <block type="variables_get">
+            <field name="VAR" id="@=*efbqX#savK%0;4;fo">list</field>
+          </block>
+        </value>
+      </block>
+      <block type="lists_split">
+        <mutation mode="SPLIT"></mutation>
+        <field name="MODE">SPLIT</field>
+        <value name="DELIM">
+          <shadow type="text">
+            <field name="TEXT">,</field>
+          </shadow>
+        </value>
+      </block>
+      <block type="lists_sort">
+        <field name="TYPE">NUMERIC</field>
+        <field name="DIRECTION">1</field>
+      </block>
+    </category>
+    <sep></sep>
     <category name="Variables" custom="VARIABLE" colour="#08979d">
     </category>
+    <category name="Functions" colour="#0d3b66" custom="PROCEDURE"></category>
   </xml>`,
 };
+
+/**
+ * When connected the broker let's change the launch button to green
+ */
+onMounted(() => {
+  mqttBroker = mqtt.connect(`ws:192.168.86.45:9001`)
+
+  mqttBroker.on('connect', () => {
+    launchButonRef.value.classList.remove('is-light')
+    launchButonRef.value.classList.add('is-primary')
+  })
+});
+
 
 const launchMission = () => {
   // console.log('launching mission')
@@ -165,10 +262,10 @@ const setupInterpreter = () => {
     interpreter.setProperty(globalObject, 'highlightBlock', interpreter.createNativeFunction(highlightBlockWrapper));
 
     // Send normal command - command processor
-    const sendCommandWrapper = function (command: string) {
-      commandProcessor.sendCommand(command);
+    const sendNavigationCommandWrapper = function (json: string) {
+      commandProcessor.sendNavigationCommand(json);
     }
-    interpreter.setProperty(globalObject, 'sendCommand', interpreter.createNativeFunction(sendCommandWrapper));
+    interpreter.setProperty(globalObject, 'sendNavigationCommand', interpreter.createNativeFunction(sendNavigationCommandWrapper));
 
     // // For the print block
     // const alertWrapper = function (message: string) {
@@ -201,16 +298,15 @@ const setupInterpreter = () => {
 
   // Launch the mission
   const code = javascriptGenerator.workspaceToCode(blocklyRef.value.workspace);
-  console.log(code);
   const interpreter = new Interpreter(code, interpreterAPI);
-  commandProcessor = new CommandProcessor(interpreter, blocklyRef.value.workspace);
+  commandProcessor = new CommandProcessor(interpreter, blocklyRef.value.workspace, mqttBroker);
   commandProcessor.step();
 }
 </script>
 
 <template>
   <div>
-    <button class="button is-primary" id="launchButton" @click="launchMission">Launch</button>
+    <button class="button is-light" id="launchButton" @click="launchMission" ref="launchButonRef">Launch</button>
     <BlocklyComponent id="blocklyComponent" :options="options" ref="blocklyRef"></BlocklyComponent>
   </div>
 </template>

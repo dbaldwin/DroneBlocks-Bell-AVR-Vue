@@ -143,6 +143,13 @@ export class NavigationBlocks {
         previousStatement: true,
         nextStatement: true,
         style: 'navigation_blocks'
+      },
+      {
+        type: 'go_home',
+        message0: 'go home',
+        previousStatement: true,
+        nextStatement: true,
+        style: 'navigation_blocks'
       }
     ])
 
@@ -153,13 +160,70 @@ export class NavigationBlocks {
         'duration',
         javascriptGenerator.ORDER_ATOMIC
       )
-      const code = `wait(${duration});`
+      const code = `waitForSeconds(${duration});`
       return code
     }
 
     javascriptGenerator['fly_forward'] = (block: Blockly.Block) => {
-      //return this.getCommand(block, 'forward', 'distance')
-      return 'fly_forward'
+      const command = `{"action": "goto_location_ned", "payload": { "n": ${this.getDistance(
+        block
+      )}, "e": 0, "d": 0, "rel": true, "heading": 0 }}`
+      return `sendNavigationCommand(${JSON.stringify(command)});`
+    }
+
+    javascriptGenerator['fly_backward'] = (block: Blockly.Block) => {
+      const command = `{"action": "goto_location_ned", "payload": { "n": ${
+        this.getDistance(block) * -1
+      }, "e": 0, "d": 0, "rel": true, "heading": 0 }}`
+      return `sendNavigationCommand(${JSON.stringify(command)});`
+    }
+
+    javascriptGenerator['fly_left'] = (block: Blockly.Block) => {
+      const command = `{"action": "goto_location_ned", "payload": { "n": 0, "e":  ${
+        this.getDistance(block) * -1
+      }, "d": 0, "rel": true, "heading": 0 }}`
+      return `sendNavigationCommand(${JSON.stringify(command)});`
+    }
+
+    javascriptGenerator['fly_right'] = (block: Blockly.Block) => {
+      const command = `{"action": "goto_location_ned", "payload": { "n": 0, "e":  ${this.getDistance(
+        block
+      )}, "d": 0, "rel": true, "heading": 0 }}`
+      return `sendNavigationCommand(${JSON.stringify(command)});`
+    }
+
+    javascriptGenerator['fly_up'] = (block: Blockly.Block) => {
+      const command = `{"action": "goto_location_ned", "payload": { "n": 0, "e":  0, "d": ${
+        this.getDistance(block) * -1
+      }, "rel": true, "heading": 0 }}`
+      return `sendNavigationCommand(${JSON.stringify(command)});`
+    }
+
+    javascriptGenerator['fly_down'] = (block: Blockly.Block) => {
+      const command = `{"action": "goto_location_ned", "payload": { "n": 0, "e":  0, "d": ${this.getDistance(
+        block
+      )}, "rel": true, "heading": 0 }}`
+      return `sendNavigationCommand(${JSON.stringify(command)});`
+    }
+
+    javascriptGenerator['go_home'] = () => {
+      const command = `{"action": "goto_location_ned", "payload": { "n": 0, "e":  0, "d": -2.5, "heading": 0 }}`
+      return `sendNavigationCommand(${JSON.stringify(command)});`
+    }
+  }
+
+  getDistance(block: Blockly.Block): number {
+    const distance: number = javascriptGenerator.valueToCode(
+      block,
+      'distance',
+      javascriptGenerator.ORDER_NONE
+    )
+
+    const units: string = block.getFieldValue('units')
+    if (units == 'ft') {
+      return distance * 0.3048
+    } else {
+      return distance
     }
   }
 }

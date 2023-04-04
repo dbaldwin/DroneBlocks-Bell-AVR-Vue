@@ -2,3 +2,7 @@
   height: 35px;
   line-height: 30px;
 }
+
+.blocklyTreeSeparator {
+  border-bottom: solid #06b0f3 1px;
+}
