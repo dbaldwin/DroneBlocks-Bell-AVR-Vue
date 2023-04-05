@@ -242,6 +242,7 @@ const launchMission = () => {
 }
 
 // Method for external application to send next command
+// @ts-ignore
 window.processNextCommand = function () {
   //console.log(javascriptGenerator.workspaceToCode(blocklyRef.value.workspace));
   commandProcessor.step();

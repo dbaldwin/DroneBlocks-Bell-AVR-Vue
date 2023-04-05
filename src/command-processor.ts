@@ -57,23 +57,23 @@ export class CommandProcessor {
   }
 
   sendLEDCommand(command, values) {
-    window.ipcRenderer.send('send_led_command_to_tello', command, values)
+    //window.ipcRenderer.send('send_led_command_to_tello', command, values)
     this.pauseCode = true
   }
 
   // Get state of drone
   getState(attribute) {
-    const val = parseFloat(document.getElementById(attribute).textContent)
-    return val
+    // const val = parseFloat(document.getElementById(attribute).textContent)
+    // return val
   }
 
   log(message) {
-    const logger = document.getElementById('consoleLogger')
-    logger.value = logger.value + message + '\n'
+    // const logger = document.getElementById('consoleLogger')
+    // logger.value = logger.value + message + '\n'
   }
 
   abort() {
-    toast('Mission aborted successfully')
+    // toast('Mission aborted successfully')
     this.isAbortingMission = true
     this.pauseCode = true
     this.reset()
@@ -101,6 +101,7 @@ export class CommandProcessor {
 
   reset() {
     // Unhighlight any blocks
+    // @ts-ignore
     this.workspace.highlightBlock(null)
 
     // Change abort button back to launch
