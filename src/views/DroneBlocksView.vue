@@ -224,7 +224,7 @@ const options = {
  * When connected the broker let's change the launch button to green
  */
 onMounted(() => {
-  mqttBroker = mqtt.connect(`ws://${location.hostname}:9001`)
+  mqttBroker = mqtt.connect(`ws://10.42.0.1:9001`)
 
   mqttBroker.on('connect', () => {
     launchButonRef.value.classList.remove('is-light')
