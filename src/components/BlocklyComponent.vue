@@ -38,7 +38,7 @@ onMounted(() => {
     if (localStorage.getItem('backup')) {
         setTimeout(() => {
             workspace.value.clear()
-            Blockly.Xml.domToWorkspace(Blockly.Xml.textToDom(localStorage.getItem('backup')), workspace.value)
+            Blockly.Xml.domToWorkspace(Blockly.Xml.textToDom(localStorage.getItem('backup') ?? ""), workspace.value)
         }, 1000)
     }
 
