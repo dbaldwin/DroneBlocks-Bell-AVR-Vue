@@ -3,7 +3,7 @@
 
 name: Deploy to Firebase Hosting on Push
 on:
-  push: 
+  push:
     branches:
       - develop
 jobs:
@@ -18,4 +18,4 @@ jobs:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
           firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_DRONEBLOCKS_BELL_AVR }}'
           projectId: droneblocks-bell-avr
-          channelId: 'preview'
+          #channelId: 'preview'
