@@ -6,7 +6,7 @@ on:
   push:
     branches:
       - develop
-      - led-control
+      - feature/led-control
 jobs:
   build_and_preview:
     # if: '${{ github.event.pull_request.head.repo.full_name == github.repository }}'
