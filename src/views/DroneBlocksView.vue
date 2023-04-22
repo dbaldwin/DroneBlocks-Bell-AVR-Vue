@@ -227,7 +227,7 @@ const options = {
  * When connected the broker let's change the launch button to green
  */
 onMounted(() => {
-  mqttBroker = mqtt.connect(`ws:192.168.86.39:9001`)
+  mqttBroker = mqtt.connect(`ws:10.42.0.1:9001`)
 
   mqttBroker.on('connect', () => {
     launchButonRef.value.classList.remove('is-light')
@@ -315,8 +315,19 @@ const setupInterpreter = () => {
 
 <template>
   <div>
-    <button class="button is-light" id="launchButton" @click="launchMission" ref="launchButonRef">Launch</button>
-    <BlocklyComponent id="blocklyComponent" :options="options" ref="blocklyRef"></BlocklyComponent>
+    <button
+      class="button is-light"
+      id="launchButton"
+      @click="launchMission"
+      ref="launchButonRef"
+    >
+      Launch
+    </button>
+    <BlocklyComponent
+      id="blocklyComponent"
+      :options="options"
+      ref="blocklyRef"
+    ></BlocklyComponent>
   </div>
 </template>
 
