@@ -56,9 +56,14 @@ export class CommandProcessor {
     }, 1000)
   }
 
-  sendLEDCommand(command, values) {
-    //window.ipcRenderer.send('send_led_command_to_tello', command, values)
+  sendLEDCommand(json: string) {
+    console.log(json)
+    this.mqttBroker.publish('avr/pcm/set_base_color', json)
     this.pauseCode = true
+
+    setTimeout(() => {
+      this.step()
+    }, 1000)
   }
 
   // Get state of drone

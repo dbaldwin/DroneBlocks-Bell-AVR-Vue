@@ -6,6 +6,7 @@ import { javascriptGenerator } from "blockly/javascript";
 import { NavigationBlocks } from "@/blocks/navigation"
 import { TakeoffBlocks } from "@/blocks/takeoff";
 import { LandBlocks } from "@/blocks/land";
+import { LEDBlocks } from "@/blocks/led";
 import Interpreter from "js-interpreter"
 import { CommandProcessor } from '@/command-processor';
 import DroneBlocksTheme from '@/themes/droneblocks.js'
@@ -17,6 +18,7 @@ let commandProcessor: CommandProcessor;
 new NavigationBlocks();
 new TakeoffBlocks();
 new LandBlocks();
+new LEDBlocks();
 
 const blocklyRef = ref();
 const launchButonRef = ref();
@@ -114,6 +116,7 @@ const options = {
     <category name="Control" colour="#ffc6ff">
     </category>
     <category name="LED" colour="#bdb2ff">
+      <block type="main_led_color"></block>
     </category>
     <sep></sep>
     <category name="Logic" colour="#4ecdc4">
@@ -224,7 +227,7 @@ const options = {
  * When connected the broker let's change the launch button to green
  */
 onMounted(() => {
-  mqttBroker = mqtt.connect(`ws:192.168.86.45:9001`)
+  mqttBroker = mqtt.connect(`ws:192.168.86.39:9001`)
 
   mqttBroker.on('connect', () => {
     launchButonRef.value.classList.remove('is-light')
@@ -267,6 +270,11 @@ const setupInterpreter = () => {
       commandProcessor.sendNavigationCommand(json);
     }
     interpreter.setProperty(globalObject, 'sendNavigationCommand', interpreter.createNativeFunction(sendNavigationCommandWrapper));
+
+    const sendLEDCommandWrapper = function (json:string) {
+      commandProcessor.sendLEDCommand(json);
+    }
+    interpreter.setProperty(globalObject, 'sendLEDCommand', interpreter.createNativeFunction(sendLEDCommandWrapper));
 
     // // For the print block
     // const alertWrapper = function (message: string) {
