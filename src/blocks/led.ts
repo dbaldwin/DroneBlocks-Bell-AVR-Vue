@@ -28,6 +28,8 @@ export class LEDBlocks {
       const command = `{"wrgb": [255, ${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}]}`
       return `sendLEDCommand(${JSON.stringify(command)});`
     }
+
+    javascriptGenerator['led_blink'] = (block: Blockly.Block) => {}
   }
 
   hexToRgb(hex) {
