@@ -6,6 +6,7 @@ import { javascriptGenerator } from "blockly/javascript";
 import { NavigationBlocks } from "@/blocks/navigation"
 import { TakeoffBlocks } from "@/blocks/takeoff";
 import { LandBlocks } from "@/blocks/land";
+import { PCCBlocks } from "@/blocks/pcc";
 import Interpreter from "js-interpreter"
 import { CommandProcessor } from '@/command-processor';
 import DroneBlocksTheme from '@/themes/droneblocks.js'
@@ -17,6 +18,7 @@ let commandProcessor: CommandProcessor;
 new NavigationBlocks();
 new TakeoffBlocks();
 new LandBlocks();
+new PCCBlocks();
 
 const blocklyRef = ref();
 const launchButonRef = ref();
@@ -111,9 +113,9 @@ const options = {
       </block>
     </category>
     <sep></sep>
-    <category name="Control" colour="#ffc6ff">
-    </category>
-    <category name="LED" colour="#bdb2ff">
+    <category name="PCC" colour="#bdb2ff">
+      <block type="main_led_color"></block>
+      <block type="fire_laser"></block>
     </category>
     <sep></sep>
     <category name="Logic" colour="#4ecdc4">
@@ -224,7 +226,7 @@ const options = {
  * When connected the broker let's change the launch button to green
  */
 onMounted(() => {
-  mqttBroker = mqtt.connect(`ws://10.42.0.1:9001`)
+  mqttBroker = mqtt.connect(`${location.hostname}:9001`)
 
   mqttBroker.on('connect', () => {
     launchButonRef.value.classList.remove('is-light')
@@ -268,6 +270,11 @@ const setupInterpreter = () => {
     }
     interpreter.setProperty(globalObject, 'sendNavigationCommand', interpreter.createNativeFunction(sendNavigationCommandWrapper));
 
+    const sendPCCCommandWrapper = function (topic: string, json: string) {
+      commandProcessor.sendPCCCommand(topic, json);
+    }
+    interpreter.setProperty(globalObject, 'sendPCCCommand', interpreter.createNativeFunction(sendPCCCommandWrapper));
+
     // // For the print block
     // const alertWrapper = function (message: string) {
     //   return commandProcessor.log(message);
@@ -307,7 +314,9 @@ const setupInterpreter = () => {
 
 <template>
   <div>
-    <button class="button is-light" id="launchButton" @click="launchMission" ref="launchButonRef">Launch</button>
+    <button class="button is-light" id="launchButton" @click="launchMission" ref="launchButonRef">
+      Launch
+    </button>
     <BlocklyComponent id="blocklyComponent" :options="options" ref="blocklyRef"></BlocklyComponent>
   </div>
 </template>
