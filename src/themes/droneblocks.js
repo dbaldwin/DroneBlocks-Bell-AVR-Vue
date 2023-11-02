@@ -22,6 +22,9 @@ const defaultBlockStyles = {
   mission_pad_blocks: {
     colourPrimary: "#ffc300",
   },
+  pcc_blocks: {
+    colourPrimary: "#bdb2ff",
+  },
   led_blocks: {
     colourPrimary: "#bdb2ff",
   },
