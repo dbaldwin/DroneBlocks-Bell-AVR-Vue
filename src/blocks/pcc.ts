@@ -1,7 +1,7 @@
 import * as Blockly from 'blockly'
 import { javascriptGenerator } from 'blockly/javascript'
 
-export class LEDBlocks {
+export class PCCBlocks {
   constructor() {
     // Block definitions
     Blockly.defineBlocksWithJsonArray([
@@ -17,7 +17,14 @@ export class LEDBlocks {
         ],
         previousStatement: true,
         nextStatement: true,
-        style: 'led_blocks'
+        style: 'pcc_blocks'
+      },
+      {
+        type: 'fire_laser',
+        message0: 'fire laser',
+        previousStatement: true,
+        nextStatement: true,
+        style: 'pcc_blocks'
       }
     ])
 
@@ -26,10 +33,13 @@ export class LEDBlocks {
       const hexColor = block.getFieldValue('color')
       const rgbColor = this.hexToRgb(hexColor)
       const command = `{"wrgb": [255, ${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}]}`
-      return `sendLEDCommand(${JSON.stringify(command)});`
+      return `sendPCCCommand('avr/pcm/set_base_color', ${JSON.stringify(command)});`
     }
 
-    javascriptGenerator['led_blink'] = (block: Blockly.Block) => {}
+    javascriptGenerator['fire_laser'] = (block: Blockly.Block) => {
+      const command = '{}'
+      return `sendPCCCommand('avr/pcm/fire_laser', ${JSON.stringify(command)});`
+    }
   }
 
   hexToRgb(hex) {

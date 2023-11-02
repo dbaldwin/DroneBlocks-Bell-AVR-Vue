@@ -56,9 +56,9 @@ export class CommandProcessor {
     }, 1000)
   }
 
-  sendLEDCommand(json: string) {
+  sendPCCCommand(topic: string, json: string) {
     console.log(json)
-    this.mqttBroker.publish('avr/pcm/set_base_color', json)
+    this.mqttBroker.publish(topic, json)
     this.pauseCode = true
 
     setTimeout(() => {
