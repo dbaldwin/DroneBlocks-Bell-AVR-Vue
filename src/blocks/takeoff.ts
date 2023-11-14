@@ -30,7 +30,7 @@ export class TakeoffBlocks {
 
     // Generators
     javascriptGenerator['takeoff'] = function (block: Blockly.Block) {
-      const command = `{"action": "takeoff", "payload": { "alt": 2.5 }}`
+      const command = `{"action": "takeoff", "payload": { "alt": 1.5 }}`
       return `sendNavigationCommand(${JSON.stringify(command)});`
     }
 
